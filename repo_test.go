@@ -920,3 +920,63 @@ func TestMarkdownReportContainsStructuredOutput(t *testing.T) {
 		}
 	}
 }
+
+func TestEvidencePackIncludesOverview(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".git"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "main.go"), []byte("package main\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r, err := NewRepo(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pack, err := BuildEvidencePack(r, "test task", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pack.Overview.Files == 0 {
+		t.Fatal("expected Overview.Files > 0")
+	}
+	// Head is empty for a repo with no commits; just confirm the field is present.
+	_ = pack.Overview.Head
+	if pack.Task != "test task" {
+		t.Fatalf("expected Task = %q, got %q", "test task", pack.Task)
+	}
+	if pack.SchemaVersion != "1" {
+		t.Fatalf("expected SchemaVersion = %q, got %q", "1", pack.SchemaVersion)
+	}
+}
+
+func TestMarkdownReportEvidencePack(t *testing.T) {
+	pack := EvidencePack{
+		SchemaVersion: "1",
+		Task:          "investigate login bug",
+		Repo:          "/tmp/repo",
+		Scan:          ScanReport{Files: 2, Bytes: 512, Extensions: map[string]int{".go": 2}},
+		Dependencies:  DependencyReport{},
+		Git:           GitReport{Head: "abc123", Commits: 1},
+		Hotspots:      HotspotReport{HistoryScope: "HEAD"},
+		Overview:      OverviewReport{Files: 2, Bytes: 512, Head: "abc123"},
+	}
+	got := markdownReport("evidence", pack)
+	for _, needle := range []string{
+		"Schema version",
+		"/tmp/repo",
+		"investigate login bug",
+		"### Overview",
+		"### Scan",
+		"### Deps",
+		"### Git",
+		"### Hotspot",
+	} {
+		if !strings.Contains(got, needle) {
+			t.Fatalf("markdown evidence pack missing %q:\n%s", needle, got)
+		}
+	}
+	if strings.Contains(got, "```text") {
+		t.Fatalf("markdown evidence pack fell through to plain-text fallback:\n%s", got)
+	}
+}

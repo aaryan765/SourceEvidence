@@ -315,6 +315,16 @@ func interactive() {
 				fmt.Printf("\nError: %v\n", err)
 			}
 			uiPause(readLine)
+		case "E":
+			task := readLine("Task description (optional) : ")
+			evidence, err := BuildEvidencePack(repo, strings.TrimSpace(task), 50)
+			if err != nil {
+				fmt.Printf("\nError: %v\n", err)
+			} else {
+				printReport("evidence", repo.Root, evidence)
+				session.set("Evidence Pack", evidence)
+			}
+			uiPause(readLine)
 		case "0":
 			fmt.Println("\nSourceEvidence closed.")
 			return

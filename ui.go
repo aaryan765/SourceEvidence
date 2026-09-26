@@ -89,6 +89,7 @@ func uiMenu(repo string, reportCount int) {
 	fmt.Println("  [9]  Change repository")
 	fmt.Println("  [A]  Codebase overview (at-a-glance map)")
 	fmt.Println("  [B]  Save session report (.md)")
+	fmt.Println("  [E]  Build Evidence Pack")
 	fmt.Println("  [0]  Exit")
 	fmt.Println()
 }
@@ -168,6 +169,8 @@ func reportBody(v any) string {
 		return explainBody(x)
 	case OverviewReport:
 		return overviewBody(x)
+	case EvidencePack:
+		return evidencePackBody(x)
 	default:
 		return fmt.Sprintf("%v", v)
 	}
@@ -444,6 +447,22 @@ func truncate(s string, max int) string {
 	return s[:max-3] + "..."
 }
 
+func evidencePackBody(e EvidencePack) string {
+	var b strings.Builder
+	uiSectionTo(&b, "EVIDENCE PACK")
+	fmt.Fprintf(&b, "  %-22s %s\n", "Schema version", e.SchemaVersion)
+	fmt.Fprintf(&b, "  %-22s %s\n", "Repository", e.Repo)
+	if e.Task != "" {
+		fmt.Fprintf(&b, "  %-22s %s\n", "Task", e.Task)
+	}
+	b.WriteString(overviewBody(e.Overview))
+	b.WriteString(scanBody(e.Scan))
+	b.WriteString(dependencyBody(e.Dependencies))
+	b.WriteString(gitBody(e.Git))
+	b.WriteString(hotspotBody(e.Hotspots))
+	return b.String()
+}
+
 func markdownReport(command string, v any) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "### %s\n\n", strings.Title(command))
@@ -550,6 +569,17 @@ func markdownReport(command string, v any) string {
 		for _, f := range r.LargestFiles {
 			fmt.Fprintf(&b, "| `%s` | %s |\n", f.Path, formatBytes(f.Bytes))
 		}
+	case EvidencePack:
+		fmt.Fprintf(&b, "**Schema version:** %s  \n**Repository:** `%s`  \n", r.SchemaVersion, r.Repo)
+		if r.Task != "" {
+			fmt.Fprintf(&b, "**Task:** %s\n", r.Task)
+		}
+		fmt.Fprintln(&b)
+		b.WriteString(markdownReport("overview", r.Overview))
+		b.WriteString(markdownReport("scan", r.Scan))
+		b.WriteString(markdownReport("deps", r.Dependencies))
+		b.WriteString(markdownReport("git", r.Git))
+		b.WriteString(markdownReport("hotspot", r.Hotspots))
 	default:
 		fmt.Fprintln(&b, "```text")
 		fmt.Fprint(&b, reportBody(v))

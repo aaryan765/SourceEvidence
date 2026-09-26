@@ -12,6 +12,7 @@ type EvidencePack struct {
 	Dependencies  DependencyReport `json:"dependencies"`
 	Git           GitReport        `json:"git"`
 	Hotspots      HotspotReport    `json:"hotspots"`
+	Overview      OverviewReport   `json:"overview"`
 }
 
 func BuildEvidencePack(r *Repo, task string, max int) (EvidencePack, error) {
@@ -30,6 +31,13 @@ func BuildEvidencePack(r *Repo, task string, max int) (EvidencePack, error) {
 	if err != nil {
 		return EvidencePack{}, err
 	}
+	// OverviewRepo internally re-runs ScanRepo and AnalyzeGit.
+	// This is duplicate work (known performance consideration) kept intentionally
+	// to preserve OverviewRepo's standalone signature and implementation scope.
+	overview, err := OverviewRepo(r, max)
+	if err != nil {
+		return EvidencePack{}, err
+	}
 	return EvidencePack{
 		SchemaVersion: "1",
 		Task:          task,
@@ -38,5 +46,6 @@ func BuildEvidencePack(r *Repo, task string, max int) (EvidencePack, error) {
 		Dependencies:  deps,
 		Git:           git,
 		Hotspots:      buildHotspots(git, scan, max),
+		Overview:      overview,
 	}, nil
 }
