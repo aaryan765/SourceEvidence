@@ -2,9 +2,11 @@
 
 ## Evidence-Driven Debugging for Real Git Repositories
 
-**SourceEvidence** is a deterministic, offline repository intelligence tool for developers who need reliable repository evidence before changing code.
+**SourceEvidence** is a deterministic, offline repository-intelligence tool for developers who need reliable evidence before changing a codebase.
 
-It analyzes repository structure, dependencies, Git history, search results, hotspots, and file-level signals, then packages those findings into an **Evidence Pack** that can be used by **IBM Bob 2.0** during debugging and application-maintenance workflows.
+It analyzes repository structure, dependencies, Git history, search results, hotspots, and file-level signals, then packages those findings into an **Evidence Pack** that can be used with **IBM Bob 2.0** during debugging and application-maintenance workflows.
+
+### Core workflow
 
 ```text
 Developer problem
@@ -22,70 +24,49 @@ IBM Bob 2.0
 Investigate -> Plan -> Implement -> Test
       |
       v
-Verified change
+Developer review
 ```
 
-**SourceEvidence provides the evidence. Bob provides the reasoning and development actions. The developer remains the reviewer.**
+**SourceEvidence provides the evidence.
+IBM Bob 2.0 provides repository-aware reasoning and development actions.
+The developer remains the reviewer.**
 
 ---
 
-## The Problem
+## Why SourceEvidence?
 
-Debugging an unfamiliar repository often requires a large amount of manual investigation before a developer can safely make a change.
+Debugging an unfamiliar repository often begins with repetitive investigation:
 
-A developer may need to understand the repository structure, find relevant files, inspect dependencies, search for related code, inspect Git history, identify frequently changed areas, and collect enough context before modifying anything.
+- understanding the repository structure;
+- locating relevant files;
+- inspecting dependencies;
+- searching for related code;
+- examining Git history;
+- identifying frequently changed areas;
+- collecting enough context before making a safe change.
 
-SourceEvidence turns that repetitive evidence-gathering process into a deterministic workflow.
+SourceEvidence turns that evidence-gathering step into a repeatable, deterministic workflow.
 
----
-
-## The Solution
-
-SourceEvidence creates a local evidence layer over a Git repository.
-
-It does **not** embed an LLM or attempt to replace AI reasoning.
-
-Instead:
-
-```text
-SourceEvidence
-    |
-    v
-Repository facts and signals
-    |
-    v
-Evidence Pack
-    |
-    v
-IBM Bob 2.0
-    |
-    v
-Repository-aware investigation
-    |
-    v
-Implementation
-    |
-    v
-Regression test
-```
-
-This separates deterministic repository evidence from AI reasoning and implementation assistance.
+It does **not** embed an LLM and does not attempt to replace the reasoning performed by IBM Bob 2.0 or the developer.
 
 ---
 
-# What SourceEvidence Provides
+# Features
 
-## 1. Scan Repository
+### Repository Scan
 
 Analyzes:
 
-- file counts
-- repository size
-- file-type distribution
-- largest files
-- conservative secret-pattern signals
+- file counts and repository size;
+- file-type distribution;
+- largest files;
+- conservative secret-pattern signals.
 
-Interactive menu: **[1] Scan repository**
+Interactive:
+
+```text
+[1] Scan repository
+```
 
 CLI:
 
@@ -101,19 +82,23 @@ sourceevidence scan <repo> --json
 
 ---
 
-## 2. Dependency Analysis
+### Dependency Analysis
 
 Analyzes supported dependency manifests and reports:
 
-- declared dependencies
-- dependency versions
-- dependency scope
-- source references
-- possible unused direct runtime dependencies
+- declared dependencies;
+- versions;
+- dependency scope;
+- source references;
+- possible unused direct runtime dependencies.
 
 Supported ecosystems include Go, Python, npm, and Rust/Cargo-related manifests.
 
-Interactive menu: **[2] Dependency analysis**
+Interactive:
+
+```text
+[2] Dependency analysis
+```
 
 CLI:
 
@@ -123,19 +108,23 @@ sourceevidence deps <repo>
 
 ---
 
-## 3. Git Archaeology
+### Git Archaeology
 
-Reads repository Git data directly to analyze:
+Analyzes repository history and metadata, including:
 
-- HEAD
-- discovered refs
-- bounded commit history
-- authors
-- changed-file counts
+- current HEAD;
+- discovered refs;
+- bounded commit history;
+- authors;
+- changed-file counts.
 
-Git analysis does not require invoking a `git` subprocess.
+Git analysis reads repository Git data directly rather than invoking a `git` subprocess.
 
-Interactive menu: **[3] Git archaeology**
+Interactive:
+
+```text
+[3] Git archaeology
+```
 
 CLI:
 
@@ -143,20 +132,26 @@ CLI:
 sourceevidence git <repo>
 ```
 
+History traversal is bounded to discovered refs and up to 500 commits.
+
 ---
 
-## 4. Search Code
+### Search Code
 
 Performs ranked, case-insensitive content search.
 
 Results include:
 
-- file path
-- line number
-- matching source line
-- relevance score
+- file path;
+- line number;
+- matching source line;
+- relevance score.
 
-Interactive menu: **[4] Search code**
+Interactive:
+
+```text
+[4] Search code
+```
 
 CLI:
 
@@ -172,11 +167,15 @@ sourceevidence find ./my-project "authentication"
 
 ---
 
-## 5. Find Hotspots
+### Find Hotspots
 
-Combines Git change history with repository signals to identify files that deserve investigation.
+Combines Git change history with repository signals to identify files that deserve closer investigation.
 
-Interactive menu: **[5] Find hotspots**
+Interactive:
+
+```text
+[5] Find hotspots
+```
 
 CLI:
 
@@ -184,21 +183,23 @@ CLI:
 sourceevidence hotspot <repo>
 ```
 
-Historical analysis is bounded to discovered repository refs and up to 500 commits.
-
 ---
 
-## 6. Explain a File
+### Explain a File
 
-Provides file-level evidence including:
+Provides file-level evidence such as:
 
-- whether the file exists
-- current size
-- Git change count
-- history scope
-- dependency/content signals
+- whether the file exists;
+- current size;
+- Git change count;
+- history scope;
+- dependency/content signals.
 
-Interactive menu: **[6] Explain a file**
+Interactive:
+
+```text
+[6] Explain a file
+```
 
 CLI:
 
@@ -214,27 +215,35 @@ sourceevidence explain ./my-project src/auth.go
 
 ---
 
-## 7. Full Repository Report
+### Full Repository Report
 
-Runs the main repository analyses in one workflow and prepares the resulting reports for export.
+Runs the core repository analyses in one workflow and prepares the results for export.
 
-Interactive menu: **[7] Run full repository report**
+Interactive:
+
+```text
+[7] Run full repository report
+```
 
 ---
 
-## 8. Codebase Overview
+### Codebase Overview
 
-Provides a deterministic at-a-glance repository map containing:
+Provides a deterministic, at-a-glance summary containing:
 
-- total files
-- repository size
-- directory/root structure
-- repository map
-- largest files
-- Git-derived hotspots
-- current HEAD
+- total files;
+- repository size;
+- directory/root structure;
+- repository map;
+- largest files;
+- Git-derived hotspots;
+- current HEAD.
 
-Interactive menu: **[A] Codebase overview**
+Interactive:
+
+```text
+[A] Codebase overview
+```
 
 CLI:
 
@@ -246,11 +255,15 @@ sourceevidence overview <repo>
 
 # Evidence Pack
 
-The **Evidence Pack** is the central workflow feature connecting SourceEvidence to IBM Bob 2.0.
+The **Evidence Pack** is the central workflow feature connecting SourceEvidence with IBM Bob 2.0.
 
-It packages deterministic repository evidence into a reusable artifact.
+Given a developer task, SourceEvidence combines deterministic repository information into a reusable report.
 
-Interactive menu: **[E] Build Evidence Pack**
+Interactive:
+
+```text
+[E] Build Evidence Pack
+```
 
 CLI:
 
@@ -272,62 +285,66 @@ sourceevidence evidence <repo> "<task>" --json
 
 An Evidence Pack contains:
 
-- investigation task
-- repository metadata
-- codebase overview
-- repository scan
-- dependency analysis
-- Git history
-- changed-file information
-- repository hotspots
+- investigation task;
+- repository metadata;
+- codebase overview;
+- scan results;
+- dependency information;
+- Git history;
+- changed-file information;
+- repository hotspots.
 
-The Evidence Pack is **evidence, not an AI conclusion**. SourceEvidence does not claim to determine the root cause automatically.
+Example:
+
+```bash
+sourceevidence evidence ./my-project "Investigate login failures" --format=markdown
+```
+
+### Important boundary
+
+The Evidence Pack is **deterministic evidence**, not an AI-generated diagnosis.
+
+SourceEvidence gathers facts and signals from the repository.
+
+IBM Bob 2.0 can then use that evidence together with its full repository context to investigate, plan, implement, and verify a change.
 
 ---
 
-# Using SourceEvidence on Your Own Repository
+# Use SourceEvidence on Your Own Repository
 
-SourceEvidence is not limited to the included demonstration project.
+SourceEvidence is not limited to the included demonstration.
 
-Point it at the Git repository you want to investigate.
+It is designed to analyze a Git repository supplied by the developer.
 
-Interactive mode:
+## Interactive workflow
+
+Start the program without a command:
 
 ```bash
 sourceevidence
 ```
 
-Then provide a repository path:
+On Windows:
+
+```powershell
+.\sourceevidence.exe
+```
+
+When prompted:
+
+```text
+Repository path [.] :
+```
+
+enter the Git repository you want to inspect.
+
+Example:
 
 ```text
 Repository path [.] : C:\Projects\MyApplication
 ```
 
-Or use the CLI directly:
-
-```bash
-sourceevidence scan C:\Projects\MyApplication
-sourceevidence deps C:\Projects\MyApplication
-sourceevidence git C:\Projects\MyApplication
-sourceevidence find C:\Projects\MyApplication "login"
-sourceevidence hotspot C:\Projects\MyApplication
-sourceevidence explain C:\Projects\MyApplication src/login.go
-sourceevidence overview C:\Projects\MyApplication
-```
-
-For an AI-assisted debugging workflow:
-
-```bash
-sourceevidence evidence C:\Projects\MyApplication "Investigate login failures" --format=markdown
-```
-
-The generated Evidence Pack can then be provided to IBM Bob 2.0 together with the repository context.
-
----
-
-# Interactive Menu
-
-Running SourceEvidence without a command opens the interactive workflow:
+The application then presents:
 
 ```text
 [1] Scan repository
@@ -345,7 +362,70 @@ Running SourceEvidence without a command opens the interactive workflow:
 [0] Exit
 ```
 
-The interactive session keeps the selected repository and accumulated reports together.
+The interactive session remembers the selected repository and lets you run multiple analyses without repeatedly typing the repository path.
+
+---
+
+# Command-Line Usage
+
+The direct command interface is useful for scripts and repeatable workflows:
+
+```text
+sourceevidence scan <repo>
+sourceevidence deps <repo>
+sourceevidence git <repo>
+sourceevidence find <repo> <query>
+sourceevidence hotspot <repo>
+sourceevidence explain <repo> <path>
+sourceevidence overview <repo>
+sourceevidence evidence <repo> [task]
+```
+
+Machine-readable JSON is available with:
+
+```text
+--json
+```
+
+Markdown output is available with:
+
+```text
+--format=markdown
+```
+
+Use the command-specific help/output for options supported by an individual command.
+
+---
+
+# Report Export
+
+### Text report
+
+Interactive option:
+
+```text
+[8] Save session report (.txt)
+```
+
+Reports are written to the user's:
+
+```text
+SourceEvidence Reports
+```
+
+directory, with a temporary-directory fallback when required.
+
+### Markdown report
+
+Interactive option:
+
+```text
+[B] Save session report (.md)
+```
+
+Markdown reports are suitable for sharing in GitHub issues, documentation, pull-request workflows, and developer tooling.
+
+The report writer does not intentionally write reports inside the repository being analyzed.
 
 ---
 
@@ -353,41 +433,41 @@ The interactive session keeps the selected repository and accumulated reports to
 
 SourceEvidence does not embed IBM Bob or require a Bob API at runtime.
 
-The demonstrated workflow is:
+The demonstrated developer workflow is:
 
-### Step 1 - Identify the developer problem
+### 1. Define the problem
 
 Example:
 
 ```text
-Payment retries are causing duplicate charges.
+A payment retry can charge the same payment twice.
 ```
 
-### Step 2 - Generate evidence
+### 2. Generate deterministic evidence
 
 ```bash
 sourceevidence evidence ./repository "Investigate duplicate payment"
 ```
 
-### Step 3 - Open the same repository in IBM Bob 2.0
+### 3. Open the same repository in IBM Bob 2.0
 
-Bob provides full repository context.
+Bob has full repository context.
 
-### Step 4 - Provide the Evidence Pack
+### 4. Provide the Evidence Pack
 
-Bob can use the deterministic evidence together with the actual source files.
+Bob can use the generated evidence together with the actual repository files.
 
-### Step 5 - Investigate and plan
+### 5. Investigate and plan
 
-Use Bob's repository-aware reasoning to identify the relevant code path and proposed change.
+Use Bob's repository-aware reasoning to identify the relevant code path and propose a change.
 
-### Step 6 - Implement
+### 6. Implement
 
-Use Bob Agent mode to apply the approved fix.
+Use Bob Agent mode to apply the approved change.
 
-### Step 7 - Verify
+### 7. Verify
 
-Run the repository's regression tests and review the resulting change.
+Run the repository's regression tests.
 
 ```text
 Evidence
@@ -396,10 +476,10 @@ Evidence
 Bob investigation
    |
    v
-Bob implementation
+Implementation
    |
    v
-Tests
+Regression test
    |
    v
 Developer review
@@ -409,9 +489,9 @@ Developer review
 
 # Reproducible IBM Bob 2.0 Demo
 
-The `hackathon_demo/` directory contains a small reproducible Go payment-processing example used to demonstrate the debugging workflow.
+The `hackathon_demo/` directory contains a small Go payment-processing example used to demonstrate the debugging workflow.
 
-The original bug causes a retry of the same payment to bypass the duplicate-payment guard.
+The example starts with a retry/idempotency bug where the same payment can be charged twice.
 
 ### Before the fix
 
@@ -424,11 +504,11 @@ duplicate charge: expected total 1000, got 2000
 
 ### SourceEvidence
 
-SourceEvidence generates an Evidence Pack describing the repository and investigation task.
+SourceEvidence generates an Evidence Pack containing repository structure, scan information, Git history, dependency information, and hotspot information for the debugging task.
 
 ### IBM Bob 2.0
 
-Bob reads the repository together with the Evidence Pack, identifies the faulty retry guard, and applies the minimal fix.
+Bob reads the repository together with the Evidence Pack, identifies the faulty retry guard, and applies the minimal correction.
 
 ### After the fix
 
@@ -446,25 +526,58 @@ hackathon_demo/
 docs/bob-session/
 ```
 
-for the reproducible workflow and Bob session evidence.
+for the complete demonstration and Bob session evidence.
 
 ---
 
-# Report Export
+# Clone and Build
 
-### Text Report
+Clone the public repository:
 
-Interactive menu: **[8] Save session report (.txt)**
+```bash
+git clone https://github.com/aaryan765/SourceEvidence.git
+cd SourceEvidence
+```
 
-Reports are written to the user's `SourceEvidence Reports` directory, with a temporary-directory fallback where required.
+Check the working tree:
 
-The report writer does not write inside the inspected repository.
+```bash
+git status
+```
 
-### Markdown Report
+Build:
 
-Interactive menu: **[B] Save session report (.md)**
+```bash
+go build .
+```
 
-Markdown reports are useful for GitHub documentation, issues, pull requests, and other developer tooling.
+Run static analysis:
+
+```bash
+go vet ./...
+```
+
+Run the test suite:
+
+```bash
+go test ./...
+```
+
+Run SourceEvidence:
+
+```bash
+sourceevidence
+```
+
+On Windows:
+
+```powershell
+.\sourceevidence.exe
+```
+
+### Windows note
+
+The commands above assume Go is correctly installed and available on `PATH`. If Windows resolves `go` to an invalid or unrelated executable, use the actual Go installation path or correct the system `PATH`; this is a host environment issue rather than a SourceEvidence dependency.
 
 ---
 
@@ -474,30 +587,35 @@ SourceEvidence is intentionally read-only during repository analysis.
 
 It:
 
-- does not modify source files in the inspected repository
-- does not delete repository files
-- does not rewrite repository content
-- reads source files, manifests, and Git objects
-- does not require network access
+- does not create, modify, delete, or rewrite source files in the inspected repository;
+- reads source files, manifests, and Git data;
+- does not require network access for repository analysis;
+- does not require a third-party runtime dependency.
+
+### Secret detection
 
 Secret detection is deliberately conservative.
 
 A detected pattern is a **signal**, not proof that a credential is valid or leaked.
 
-Test and fixture paths can be classified separately from high-risk secret signals, and high-entropy values remain visible for developer review.
+Test and fixture paths can be classified separately from high-risk secret signals, while high-entropy values remain visible for developer review.
 
-Repository path handling also rejects traversal and symlink escapes for file-focused operations.
+### Repository path handling
+
+File-focused operations validate repository paths and reject traversal or symlink escapes.
 
 ---
 
 # Technology
 
-- Go
-- Go standard library only
-- zero third-party runtime dependencies
-- offline repository analysis
-- direct Git object/history analysis
-- Windows / Linux / macOS support
+- **Language:** Go
+- **Runtime dependencies:** none
+- **External packages:** none
+- **Network requirement:** none for repository analysis
+- **Git subprocess:** not required for Git analysis
+- **Platforms:** Windows, Linux, macOS
+
+SourceEvidence uses the Go standard library.
 
 ---
 
@@ -505,53 +623,56 @@ Repository path handling also rejects traversal and symlink escapes for file-foc
 
 ```text
 SourceEvidence/
-├── main.go
-├── ui.go
-├── repo.go
-├── scan.go
-├── deps.go
-├── git.go
-├── search.go
-├── overview.go
-├── evidence.go
+├── main.go              CLI dispatch and interactive workflow
+├── ui.go                terminal rendering and report formatting
+├── repo.go              repository validation and initialization
+├── scan.go              repository scanning and security signals
+├── deps.go              dependency analysis
+├── git.go               Git object/history analysis
+├── search.go            content search and hotspot analysis
+├── overview.go          codebase overview
+├── evidence.go          Evidence Pack generation
 │
-├── *_test.go
+├── *_test.go             automated tests
+├── test_helpers_test.go  self-contained test-fixture setup
+├── demo_repo/            Git-history test fixture used by repository tests
 │
-├── hackathon_demo/
-│   ├── payment.go
-│   ├── payment_test.go
-│   ├── service.go
-│   ├── go.mod
-│   └── SOURCEEVIDENCE_EVIDENCE.md
+├── hackathon_demo/       reproducible IBM Bob 2.0 debugging example
 │
 ├── docs/
-│   └── bob-session/
+│   └── bob-session/      Bob task/session evidence
 │
-├── HACKATHON_DEMO.md
+├── HACKATHON_DEMO.md     hackathon workflow walkthrough
 └── README.md
 ```
 
 ---
 
-# Building and Testing
+# Testing and Validation
 
-Build:
+Standard checks:
 
 ```bash
-go build -o sourceevidence .
+go test ./...
+go vet ./...
+go build .
 ```
 
-Run tests:
+The project also contains tests covering repository scanning, dependency handling, Git analysis, search, reports, and Evidence Pack behavior.
+
+### Self-contained repository tests
+
+The repository includes `demo_repo/` as a tracked Git-history fixture used by a small number of tests. Its Git metadata is stored as `.git-fixture` so it can be committed normally without becoming a nested Git repository.
+
+During tests, `test_helpers_test.go` copies the fixture into a temporary directory and restores `.git` there before the repository-analysis tests run. This keeps the public clone self-contained while preserving the fixture's real Git history for tests such as `TestPackedGitHistory`.
+
+A fresh clone should therefore be able to run:
 
 ```bash
 go test ./...
 ```
 
-Static analysis:
-
-```bash
-go vet ./...
-```
+without requiring any files from the developer's local machine.
 
 ---
 
@@ -559,11 +680,11 @@ go vet ./...
 
 ### Deterministic Evidence
 
-Repository facts and signals are generated from the repository itself rather than by AI inference.
+Repository facts and signals are derived from repository data rather than AI inference.
 
 ### Read-Only Analysis
 
-Repository investigation does not modify the target repository.
+Repository investigation does not intentionally modify the target repository.
 
 ### Offline-First
 
@@ -585,7 +706,7 @@ The developer reviews the proposed and implemented change and verifies the resul
 
 # IBM Bob 2.0 Hackathon
 
-SourceEvidence was developed for the IBM Bob 2.0 Hackathon as a debugging and application-maintenance workflow.
+SourceEvidence was developed for the IBM Bob 2.0 Hackathon as a **debugging and application-maintenance workflow**.
 
 The demonstrated workflow is:
 
@@ -614,4 +735,12 @@ Regression test
 Verified change
 ```
 
-See `HACKATHON_DEMO.md` for the complete reproducible example and `docs/bob-session/` for IBM Bob session evidence.
+The hackathon demonstration is intentionally reproducible and separate from the core SourceEvidence implementation.
+
+See `HACKATHON_DEMO.md` for the workflow and `docs/bob-session/` for Bob session evidence.
+
+---
+
+# License
+
+See `LICENSE`.

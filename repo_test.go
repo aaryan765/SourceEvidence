@@ -23,11 +23,7 @@ func TestApplyDelta(t *testing.T) {
 }
 
 func TestSearchDemoRepo(t *testing.T) {
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	root := filepath.Join(wd, "demo_repo")
+	root := prepareDemoRepo(t)
 	r, err := NewRepo(root)
 	if err != nil {
 		t.Fatal(err)
@@ -722,11 +718,7 @@ func TestTopLevelArea(t *testing.T) {
 }
 
 func TestOverviewDemoRepo(t *testing.T) {
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	r, err := NewRepo(filepath.Join(wd, "demo_repo"))
+	r, err := NewRepo(prepareDemoRepo(t))
 	if err != nil {
 		t.Fatal(err)
 	}
