@@ -1,68 +1,124 @@
-# SourceEvidence validation
+# SourceEvidence Validation
 
-This release is a clean rebuild of SourceEvidence with the interactive menu, report export, dependency-scope improvements, conservative secret signals, unified Git-history semantics, Markdown reporting, Evidence Pack output, and deterministic Codebase Overview.
+This document records validation checks performed for the current SourceEvidence release.
 
-## Automated checks
+---
+
+## Automated Checks
+
+The current source tree was verified with:
 
 ```text
-go test -count=1 ./...        PASS
-go test -race -count=1 ./... PASS
-go vet ./...                 PASS
-go list -m all               sourceevidence only
-go build -trimpath           PASS
+go test ./...        PASS
+go vet ./...         PASS
+go build .           PASS
+go list -m all       sourceevidence only
 ```
 
-## Regression coverage
+A fresh clone of the public GitHub repository was also verified successfully with:
+
+```text
+go test ./...        PASS
+go vet ./...         PASS
+go build .           PASS
+```
+
+The fresh-clone verification confirmed that the checked-in `demo_repo` fixture and its Git pack data are available from the public repository without relying on external local files.
+
+---
+
+## Regression Coverage
 
 The test suite covers:
 
-- Correct byte-to-KB/MB/GB formatting.
-- Go, Python, npm, and Cargo source-aware dependency matching.
-- `pyproject.toml` runtime, optional, docs, and dev/test dependency scopes.
-- Requirements-file comment sections for optional, documentation, packaging/build, tests, and linting scopes.
-- File-level dependency mentions based on actual imports across Go, Python, npm, and Cargo, including renamed Cargo dependencies.
-- Hotspots and Explain sharing the same bounded Git-history traversal and exposing the history scope explicitly.
-- Dependency duplicate merging within the same ecosystem/scope.
-- Conservative secret detection with low-entropy test/fixture credentials classified as `mock-test-secret` while high-entropy values remain visible.
-- Repository path traversal and symlink-escape rejection.
-- Clean `.txt` report generation outside the inspected repository.
-- Structured Markdown report generation.
-- Packed Git history parsing and demo-repository hotspots.
-- Deterministic codebase overview areas, hotspot mapping, and largest-file presentation.
-- Evidence Pack aggregation for AI-agent/automation workflows.
+- Byte-to-KB/MB/GB formatting.
+- Go, Python, npm, and Cargo dependency matching.
+- `pyproject.toml` dependency scopes.
+- Requirements-file dependency sections where supported.
+- File-level dependency mentions based on source imports.
+- Git-history analysis and bounded history traversal.
+- Dependency duplicate handling.
+- Conservative secret-pattern detection.
+- Repository path and symlink-escape validation.
+- Text report generation.
+- Markdown report generation.
+- Packed Git history parsing.
+- Codebase Overview generation.
+- Evidence Pack aggregation.
 
-## Cross-platform builds
+---
 
-```text
-Windows/amd64  PASS
-Linux/amd64    PASS
-macOS/arm64    PASS
-CGO_ENABLED=0 / standard-library-only build PASS
+## Reproducible Linux/amd64 Build
+
+Linux/amd64 reproducibility was verified using:
+
+| Setting | Value |
+| --- | --- |
+| Go version | `go1.27.1 windows/amd64` |
+| Target OS | `linux` |
+| Target architecture | `amd64` |
+| CGO | disabled |
+
+Build command:
+
+```bash
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o sourceevidence .
 ```
 
-The Linux/amd64 release was built twice with identical flags and produced the same SHA-256:
+Two consecutive builds produced the same SHA-256 digest:
 
 ```text
-6f7e8accba83b757832ac2586bac9f5d4364e278874d419f47dc6c3663a82cf4
+16766CD37DDAC989646CDA66693C2E43C86DF546F7D021A37F6DF0F36EA6D128
 ```
 
-## Functional smoke tests
+The two generated Linux/amd64 artifacts were byte-identical.
 
-The analysis commands and interactive menu were exercised against the included Git demo repository, and the real-world validation workflow was exercised against HTTPX on Windows.
+See `REPRODUCIBLE_BUILD.md` for the complete build record.
+
+---
+
+## Functional Smoke Tests
+
+The core SourceEvidence workflow was exercised against the included Git demo repository.
+
+| Workflow | Result |
+| --- | --- |
+| Scan repository | PASS |
+| Dependency analysis | PASS |
+| Git archaeology | PASS |
+| Code search | PASS |
+| Hotspot analysis | PASS |
+| File explanation | PASS |
+| Full repository report | PASS |
+| Codebase overview | PASS |
+| Text report export | PASS |
+| Markdown output | PASS |
+| Evidence Pack | PASS |
+
+The interactive menu was exercised through the repository-analysis, reporting, overview, and Evidence Pack workflows.
+
+---
+
+## Dependency Verification
+
+The project uses only the Go standard library at runtime.
 
 ```text
-scan              PASS
-deps              PASS
-git               PASS
-find              PASS
-hotspot           PASS
-explain           PASS
-full report       PASS
-overview           PASS
-overview JSON      PASS
-.txt export       PASS
-Markdown output   PASS
-Evidence Pack     PASS
+go list -m all
 ```
 
-A real HTTPX scan exposed one deliberate test credential at `tests/test_auth.py:150`; this is now classified as `mock-test-secret` rather than a high-risk generic secret. The dependency analyzer also uses requirements-file section comments where available to avoid treating documentation, packaging, and test tooling as runtime dependencies.
+reports only:
+
+```text
+sourceevidence
+```
+
+No third-party Go modules are required for the runtime.
+
+---
+
+## Notes
+
+Secret detection is intentionally conservative. A detected value is a signal for review rather than proof that a credential is valid or exposed.
+
+The checked-in `demo_repo` is used as a deterministic test fixture. Tests prepare an isolated temporary copy when a working `.git` directory is required for Git-history analysis.
